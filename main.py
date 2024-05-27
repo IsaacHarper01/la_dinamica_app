@@ -13,9 +13,9 @@ import sqlite3
 from fpdf import FPDF
 import os
 from datetime import date
-import cv2
+#import cv2
 from pyzbar.pyzbar import decode
-import re
+#import re
 from datetime import datetime
 import csv
 from plyer import storagepath
