@@ -14,7 +14,7 @@ from fpdf import FPDF
 import os
 from datetime import date
 #import cv2
-from pyzbar.pyzbar import decode
+#from pyzbar.pyzbar import decode
 #import re
 from datetime import datetime
 import csv
@@ -24,8 +24,6 @@ Builder.load_file('app.kv')
 general_path = os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
 documents_folder = storagepath.get_documents_dir()
 present_date = date.today().strftime("%d-%m-%Y")
-
-
 id = None
 ##################### GLOABAL FUNCTIONS ########################
 
@@ -225,27 +223,27 @@ class escanear(Screen):
 
     def start_camera(self):
         self.record = True
-        self.capture = cv2.VideoCapture(0)
-        Clock.schedule_interval(self.update, 1.0 / 1.0)
+        # self.capture = cv2.VideoCapture(0)
+        # Clock.schedule_interval(self.update, 1.0 / 1.0)
 
     def update(self, dt):
         global id
-        ret, frame = self.capture.read()
-        if ret:
-            qr_codes = decode(frame)
-            if qr_codes:
-                data = qr_codes[0].data.decode()
-                pattern_id = r'id:\d+'
-                matches = re.findall(pattern_id, data)
-                id = matches[0][3:]
-                self.buttons_desactived = False
-                self.text_label = self.get_info(id)
-                self.stop_camera()
+        # ret, frame = self.capture.read()
+        # if ret:
+        #     qr_codes = decode(frame)
+        #     if qr_codes:
+        #         data = qr_codes[0].data.decode()
+        #         pattern_id = r'id:\d+'
+        #         matches = re.findall(pattern_id, data)
+        #         id = matches[0][3:]
+        #         self.buttons_desactived = False
+        #         self.text_label = self.get_info(id)
+        #         self.stop_camera()
                 
     def stop_camera(self):
         self.record = False
-        if self.capture:
-            self.capture.release()
+        # if self.capture:
+        #     self.capture.release()
 
     def get_info(self,id):
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
