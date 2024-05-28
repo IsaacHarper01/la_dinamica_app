@@ -14,11 +14,12 @@ from fpdf import FPDF
 import os
 from datetime import date
 from PIL import Image
-from pyzbar.pyzbar import decode
-import re
+from pyzxing import BarCodeReader
+#import re
 from datetime import datetime
 import csv
 from plyer import storagepath
+import io
 #################### GLOBAL VARIABLES ##########################
 Builder.load_file('app.kv')
 general_path = os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
@@ -206,6 +207,7 @@ class escanear(Screen):
     text_label = StringProperty("QR code info will be shown here")
     buttons_desactived = BooleanProperty(True)
     record = BooleanProperty(False)
+    
 
     def __init__(self, **kwargs):
         super(escanear, self).__init__(**kwargs)
@@ -236,21 +238,29 @@ class escanear(Screen):
     def scan_for_qr(self, dt):
         global id
         texture = self.ids.camera.texture
-        if texture:
-            size = texture.size
-            buffer = texture.pixels
-            image = Image.frombytes(mode='RGBA', size=size, data=buffer)
-            decoded_objects = decode(image)
+        if not texture:
+            return
+        buf = texture.pixels
+        size = texture.size
+        pil_image = Image.frombytes(mode='RGBA', size=size, data=buf)
+        grayscale_image = pil_image.convert('L')
 
-            if decoded_objects:
-                self.stop_camera()
-                qr_code_data = decoded_objects[0].data.decode('utf-8')
-                self.text_label = qr_code_data
-                pattern_id = r'id:\d+'
-                matches = re.findall(pattern_id, qr_code_data)
-                id = matches[0][3:]
-                self.buttons_desactived = False
-                self.text_label = self.get_info(id)
+        buffer = io.BytesIO()
+        grayscale_image.save(buffer, format='PNG')
+
+        buffer.seek(0)
+        reader = BarCodeReader()
+        decoded_objects = reader.decode(buffer)
+
+        if decoded_objects:
+            qr_code_data = decoded_objects[0].parsed
+            self.text_label = qr_code_data 
+            self.camera.play = False  # Stop the camera when QR code is detected
+                # pattern_id = r'id:\d+'
+                # matches = re.findall(pattern_id, qr_code_data)
+                # id = matches[0][3:]
+                # self.buttons_desactived = False
+                # self.text_label = self.get_info(id)
                 
     def get_info(self,id):
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
