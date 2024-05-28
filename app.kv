@@ -128,10 +128,12 @@
 <escanear>:
     name: '4'
     Camera:
+        orientation: "vertical"
+        id: camera
         size_hint: 1,.5
         pos_hint: {"center_y":.8}
-        resolution: (320,240)
-        play: root.record
+        resolution: (640,480)
+        play: False
     GridLayout:
         spacing: "15dp"
         cols:1

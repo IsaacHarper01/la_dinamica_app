@@ -6,13 +6,23 @@ from kivy.core.image import Image as CoreImage
 from kivy.graphics.texture import Texture
 from pyzbar.pyzbar import decode
 from PIL import Image
-import io
+from kivy.properties import StringProperty, BooleanProperty
 
-class QRScannerScreen(Screen):
+class escanear(Screen):
+
+    text_label = StringProperty("QR code info will be shown here")
+    buttons_desactived = BooleanProperty(True)
+    record = BooleanProperty(False)
+
+    def __init__(self, **kwargs):
+        super(escanear, self).__init__(**kwargs)
+        self.capture = None
+        self.scanning = True
+
     def on_enter(self):
         try:
             self.ids.camera.play = True
-            Clock.schedule_interval(self.scan_for_qr, 1.0 / 30.0)  # 30 frames per second
+            Clock.schedule_interval(self.scan_for_qr, 1.0 / 5.0)
         except Exception as e:
             print(f"Error starting camera: {e}")
 
@@ -43,7 +53,7 @@ class QRApp(App):
     def build(self):
         Builder.load_file('main.kv')
         sm = ScreenManager()
-        sm.add_widget(QRScannerScreen(name='qr_scanner'))
+        sm.add_widget(escanear(name='qr_scanner'))
         sm.add_widget(ResultScreen(name='result'))
         return sm
 
