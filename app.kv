@@ -128,7 +128,7 @@
 <escanear>:
     name: '4'
     Camera:
-        orientation: "vertical"
+        orientation: "horizontal"
         id: camera
         size_hint: 1,.5
         pos_hint: {"center_y":.8}
@@ -140,10 +140,11 @@
         size_hint: .8,.5
         pos_hint: {"center_x":.5}
         Label:
+            id: qr_label
             text: root.text_label
         Button:
             text: "Start"
-            on_press: root.start_camera()
+            on_press: root.on_enter()
         Button:
             text: "Marcar asistencia"
             disabled: root.buttons_desactived

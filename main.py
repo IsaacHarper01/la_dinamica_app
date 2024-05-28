@@ -14,8 +14,8 @@ from fpdf import FPDF
 import os
 from datetime import date
 from PIL import Image
-#from pyzbar.pyzbar import decode
-#import re
+from pyzbar.pyzbar import decode
+import re
 from datetime import datetime
 import csv
 from plyer import storagepath
@@ -201,49 +201,6 @@ class agregar_alumno(Screen):
         os.remove(QR_path)
 class reportes(Screen):
     pass
-# class escanear(Screen):
-    
-#     text_label = StringProperty("QR code info will be shown here")
-#     buttons_desactived = BooleanProperty(True)
-#     record = BooleanProperty(False)
-
-#     def __init__(self, **kwargs):
-#         super(escanear, self).__init__(**kwargs)
-#         self.capture = None
-#         self.scanning = True
-
-#     def on_enter(self):
-#         self.start_camera()
-
-#     def on_leave(self):
-#         global id
-#         self.stop_camera()
-#         self.text_label= ""
-#         self.buttons_desactived = True
-
-#     def start_camera(self):
-#         self.record = True
-#         # self.capture = cv2.VideoCapture(0)
-#         # Clock.schedule_interval(self.update, 1.0 / 1.0)
-
-#     def update(self, dt):
-#         global id
-#         # ret, frame = self.capture.read()
-#         # if ret:
-#         #     qr_codes = decode(frame)
-#         #     if qr_codes:
-#         #         data = qr_codes[0].data.decode()
-#         #         pattern_id = r'id:\d+'
-#         #         matches = re.findall(pattern_id, data)
-#         #         id = matches[0][3:]
-#         #         self.buttons_desactived = False
-#         #         self.text_label = self.get_info(id)
-#         #         self.stop_camera()
-                
-#     def stop_camera(self):
-#         self.record = False
-#         # if self.capture:
-#         #     self.capture.release()
 class escanear(Screen):
 
     text_label = StringProperty("QR code info will be shown here")
@@ -263,6 +220,13 @@ class escanear(Screen):
             print(f"Error starting camera: {e}")
 
     def on_leave(self):
+        global id 
+        self.stop_camera()
+        id = None
+        self.text_label = ""
+        self.buttons_desactived = True
+
+    def stop_camera(self):
         try:
             self.ids.camera.play = False
             Clock.unschedule(self.scan_for_qr)
@@ -270,18 +234,24 @@ class escanear(Screen):
             print(f"Error stopping camera: {e}")
 
     def scan_for_qr(self, dt):
+        global id
         texture = self.ids.camera.texture
         if texture:
             size = texture.size
             buffer = texture.pixels
             image = Image.frombytes(mode='RGBA', size=size, data=buffer)
-            # decoded_objects = decode(image)
+            decoded_objects = decode(image)
 
-            # if decoded_objects:
-            #     qr_code_data = decoded_objects[0].data.decode('utf-8')
-            #     self.manager.current = 'result'
-            #     self.manager.get_screen('result').ids.qr_label.text = f"QR code detected: {qr_code_data}"
-
+            if decoded_objects:
+                self.stop_camera()
+                qr_code_data = decoded_objects[0].data.decode('utf-8')
+                self.text_label = qr_code_data
+                pattern_id = r'id:\d+'
+                matches = re.findall(pattern_id, qr_code_data)
+                id = matches[0][3:]
+                self.buttons_desactived = False
+                self.text_label = self.get_info(id)
+                
     def get_info(self,id):
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
         c= conn.cursor()

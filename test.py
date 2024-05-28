@@ -59,3 +59,47 @@ class QRApp(App):
 
 if __name__ == '__main__':
     QRApp().run()
+
+# class escanear(Screen):
+    
+#     text_label = StringProperty("QR code info will be shown here")
+#     buttons_desactived = BooleanProperty(True)
+#     record = BooleanProperty(False)
+
+#     def __init__(self, **kwargs):
+#         super(escanear, self).__init__(**kwargs)
+#         self.capture = None
+#         self.scanning = True
+
+#     def on_enter(self):
+#         self.start_camera()
+
+#     def on_leave(self):
+#         global id
+#         self.stop_camera()
+#         self.text_label= ""
+#         self.buttons_desactived = True
+
+#     def start_camera(self):
+#         self.record = True
+#         # self.capture = cv2.VideoCapture(0)
+#         # Clock.schedule_interval(self.update, 1.0 / 1.0)
+
+#     def update(self, dt):
+#         global id
+#         # ret, frame = self.capture.read()
+#         # if ret:
+#         #     qr_codes = decode(frame)
+#         #     if qr_codes:
+#         #         data = qr_codes[0].data.decode()
+#         #         pattern_id = r'id:\d+'
+#         #         matches = re.findall(pattern_id, data)
+#         #         id = matches[0][3:]
+#         #         self.buttons_desactived = False
+#         #         self.text_label = self.get_info(id)
+#         #         self.stop_camera()
+                
+#     def stop_camera(self):
+#         self.record = False
+#         # if self.capture:
+#         #     self.capture.release()
