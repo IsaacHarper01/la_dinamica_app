@@ -1,0 +1,34 @@
+ScreenManager:
+    QRScannerScreen:
+    ResultScreen:
+
+<QRScannerScreen>:
+    name: 'qr_scanner'
+    BoxLayout:
+        orientation: 'vertical'
+        Camera:
+            id: camera
+            resolution: (640, 480)
+            play: False
+        Button:
+            text: 'Scan Again'
+            size_hint_y: None
+            height: '48dp'
+            on_press:
+                root.manager.current = 'qr_scanner'
+                root.on_enter()  # Restart the QR scanning
+
+<ResultScreen>:
+    name: 'result'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            id: qr_label
+            text: 'QR code detected: '
+        Button:
+            text: 'Scan Again'
+            size_hint_y: None
+            height: '48dp'
+            on_press:
+                root.manager.current = 'qr_scanner'
+                root.manager.get_screen('qr_scanner').on_enter()  # Restart the QR scanning
