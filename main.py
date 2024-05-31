@@ -15,11 +15,12 @@ import os
 from datetime import date
 from PIL import Image
 from pyzxing import BarCodeReader
+import tempfile
 #import re
 from datetime import datetime
 import csv
 from plyer import storagepath
-import io
+
 #################### GLOBAL VARIABLES ##########################
 Builder.load_file('app.kv')
 general_path = os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
@@ -215,6 +216,7 @@ class escanear(Screen):
         self.scanning = True
 
     def on_enter(self):
+        pass
         try:
             self.ids.camera.play = True
             Clock.schedule_interval(self.scan_for_qr, 1.0 / 5.0)
@@ -243,25 +245,26 @@ class escanear(Screen):
         buf = texture.pixels
         size = texture.size
         pil_image = Image.frombytes(mode='RGBA', size=size, data=buf)
-        grayscale_image = pil_image.convert('L')
+        temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+        temp_file_name = temp_file.name
+        temp_file.close()
 
-        buffer = io.BytesIO()
-        grayscale_image.save(buffer, format='PNG')
-
-        buffer.seek(0)
-        reader = BarCodeReader()
-        decoded_objects = reader.decode(buffer)
-
-        if decoded_objects:
-            qr_code_data = decoded_objects[0].parsed
+        pil_image.save(temp_file_name)
+        reader=BarCodeReader()
+    
+        decoded_objects = reader.decode(temp_file_name)
+        try:
+            qr_code_data = decoded_objects[0]['raw']
             self.text_label = qr_code_data 
-            self.camera.play = False  # Stop the camera when QR code is detected
+            self.stop_camera()
                 # pattern_id = r'id:\d+'
                 # matches = re.findall(pattern_id, qr_code_data)
                 # id = matches[0][3:]
                 # self.buttons_desactived = False
                 # self.text_label = self.get_info(id)
-                
+        except:
+            pass
+
     def get_info(self,id):
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
         c= conn.cursor()
@@ -315,7 +318,7 @@ class buscar_alumno(Screen):
     text_label = StringProperty("Datos")
     search_name = ""
     activate_delete = BooleanProperty(True)
-    activate_attendance = BooleanProperty(True)
+    activate_buttons = BooleanProperty(True)
 
     def search_press(self):
         global id
@@ -332,10 +335,10 @@ class buscar_alumno(Screen):
             if label:
                 num_class = GetNumClases_OrSubstract(id,False)
                 self.text_label = f"""Nombre: {label[0][1]} \nTelefono: {label[0][4]}\nClases restantes: {num_class}"""
-                self.activate_attendance = False 
+                self.activate_buttons = False 
             else:
                 self.text_label = "Registro Inexistente"
-                self.activate_attendance = True
+                self.activate_buttons = True
 
         elif self.search_name:
             conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
@@ -345,10 +348,10 @@ class buscar_alumno(Screen):
             if label:
                 self.text_label = f"""Nombre: {label[0][1]} \nTelefono: {label[0][4]}"""
                 id = label[0][0]
-                self.activate_attendance = False 
+                self.activate_buttons = False 
             else:
                 self.text_label = "Registro Inexistente"
-                self.activate_attendance = True
+                self.activate_buttons = True
         else: 
             self.text_label = "Ingresa el número o nombre del alumno"
             return

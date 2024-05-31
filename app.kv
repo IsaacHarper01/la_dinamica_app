@@ -185,10 +185,14 @@
         Button:
             text: "Marcar asistencia"
             on_press: root.mark_present()
-            disabled: root.activate_attendance
+            disabled: root.activate_buttons
         Button:
             text: "Reporte de asistencias"
             disabled: True
+        Button:
+            text: "Pagos"
+            disabled: root.activate_buttons
+            on_release: app.root.current = '8'
         Button:
             text: "Eliminar registro"
             on_press: root.delete_register()
