@@ -219,7 +219,7 @@ class escanear(Screen):
         pass
         try:
             self.ids.camera.play = True
-            Clock.schedule_interval(self.scan_for_qr, 1.0 / 5.0)
+            Clock.schedule_interval(self.scan_for_qr, 1.0 / 20.0)
         except Exception as e:
             print(f"Error starting camera: {e}")
 
@@ -253,8 +253,10 @@ class escanear(Screen):
         reader=BarCodeReader()
     
         decoded_objects = reader.decode(temp_file_name)
+        
         try:
-            qr_code_data = decoded_objects[0]['raw']
+            qr_code_data = str(decoded_objects[0]['raw'])
+            
             self.text_label = qr_code_data 
             self.stop_camera()
                 # pattern_id = r'id:\d+'
