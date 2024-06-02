@@ -201,6 +201,13 @@ class agregar_alumno(Screen):
         pdf.image(responsiva_path,20,100,180,160)
         pdf.output(f"{documents_folder}/{name}.pdf","F")
         os.remove(QR_path)
+
+    def on_leave(self):
+        self.ids.name_input.text=""
+        self.ids.address_input.text=""
+        self.ids.age_input.text=""
+        self.ids.phone_input.text=""
+        self.ids.last_name_input.text=""
 class reportes(Screen):
     pass
 class escanear(Screen):
@@ -366,6 +373,7 @@ class buscar_alumno(Screen):
             id = self.ids.search_id.text
         mark_attendance(id)
         GetNumClases_OrSubstract(id,True)
+        self.activate_buttons=True
         self.text_label="Asistencia Registrada"
 
     def on_switch_active(self,widget):
@@ -388,12 +396,19 @@ class buscar_alumno(Screen):
         conn.commit()
         conn.close()
         self.text_label = "Registro Eliminado"
+    
+    def on_leave(self):
+        self.ids.search.text=""
+        self.ids.search_id.text=""
 class reporte_de_asistencias(Screen):
     day = date.today().day
     month = date.today().month
     year = date.today().year
     text_label = StringProperty("Selecciona un periodo")
+    activate_buttons=BooleanProperty(True)
 
+    def press_month(self):
+        self.activate_buttons= False
     def on_january(self):
         get_csv(1,1,self.year,31,1,self.year)
         self.text_label="Reporte generado"
