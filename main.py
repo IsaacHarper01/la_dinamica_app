@@ -223,10 +223,9 @@ class escanear(Screen):
         self.scanning = True
 
     def on_enter(self):
-        pass
         try:
             self.ids.camera.play = True
-            Clock.schedule_interval(self.scan_for_qr, 1.0 / 20.0)
+            Clock.schedule_interval(self.scan_for_qr, 1.0 / 30.0)
         except Exception as e:
             print(f"Error starting camera: {e}")
 
@@ -273,6 +272,10 @@ class escanear(Screen):
                 # self.text_label = self.get_info(id)
         except:
             pass
+        
+        finally:
+            # Ensure the temporary file is deleted
+            os.remove(temp_file_name)
 
     def get_info(self,id):
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
@@ -387,11 +390,13 @@ class buscar_alumno(Screen):
         if id:
             c.execute("DELETE FROM registros WHERE id=?",(id,))
             c.execute("DELETE FROM attendance WHERE student_id=?",(id,))
+            c.execute("DELETE FROM payments WHERE student_id=?",(id,))
         elif self.search_name:
             c.execute("SELECT id FROM registros WHERE name =?",(self.search_name))
             id = c.fetchall()[0][0]
             c.execute("DELETE FROM registros WHERE name=?",(id,))
             c.execute("DELETE FROM attendande WHERE id=?",(id,))
+            c.execute("DELETE FROM payments WHERE student_id = ?",(id,))
 
         conn.commit()
         conn.close()
@@ -479,17 +484,18 @@ class reporte_de_ingresos(Screen):
     def on_december(self):
         self.text_label="Reporte generado"
     def get_daily_income(self):
-        date = present_date
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
         c = conn.cursor()
-        query2 = "SELECT %s FROM payments"%date####ERORR HERE
+        query2 = 'SELECT "%s" FROM payments'%present_date
         c.execute(query2)
         data = c.fetchall()
-        print(data)
         total=0
         if data:
             total = sum([num[0] for num in data])
-        self.text_label = f"Ingreso de hoy: {total}"
+            self.text_label = f"Ingreso del día: {str(total)}"
+        else:
+            self.text_label = "No hay registro disponible"
+        
 class Navegar(ScreenManager):
     pass
 class Application(App):
