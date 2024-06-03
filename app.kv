@@ -132,7 +132,7 @@
         id: camera
         size_hint: 1,.5
         pos_hint: {"center_y":.8}
-        resolution: (640,480)
+        resolution: (1024,768)
         play: False
     GridLayout:
         spacing: "15dp"
@@ -185,10 +185,14 @@
         Button:
             text: "Marcar asistencia"
             on_press: root.mark_present()
-            disabled: root.activate_attendance
+            disabled: root.activate_buttons
         Button:
             text: "Reporte de asistencias"
             disabled: True
+        Button:
+            text: "Pagos"
+            disabled: root.activate_buttons
+            on_release: app.root.current = '8'
         Button:
             text: "Eliminar registro"
             on_press: root.delete_register()
@@ -201,53 +205,119 @@
         
 <reporte_de_asistencias>:
     name: '6'
-    size_hint: 1,.9
+    size_hint: 1,1
     BoxLayout:
-        size_hint: 1,1
+        spacing: "10dp"
         orientation:"vertical"
         Label:
+            size_hint: 1,.6
             text: root.text_label
+        Label:
+            size_hint: 1,.2
+            text: "Fecha de inicio: día mes año (dd-mm-yyyy)"
+        GridLayout:
+            cols:3
+            spacing: "10dp"
+            size_hint: .9,.15
+            pos_hint: {"center_x":.5}
+            TextInput:
+                id: day
+                multiline: False
+            TextInput:
+                id: month
+                multiline: False
+            TextInput:
+                id: year
+                multiline: False
+        Label:
+            size_hint: 1,0.2
+            text: "Fecha de cierre: día mes año (dd-mm-yyyy)"
+        GridLayout:
+            cols:3
+            spacing: "10dp"
+            size_hint: .9,.15
+            pos_hint: {"center_x":.5}
+            TextInput:
+                id: day
+                multiline: False
+            TextInput:
+                id: month
+                multiline: False
+            TextInput:
+                id: year
+                multiline: False
+        Button:
+            pos_hint: {"center_x":.5}
+            size_hint: .9,.2
+            text: "Generar"
+        Button:
+            pos_hint: {"center_x":.5}
+            size_hint: .9,.2
+            text: "Reporte diario"
+            on_press: root.get_daily_income()
+        Button:
+            pos_hint: {"center_x":.5}
+            size_hint: .9,.2
+            text: "Reporte mensual"
+            on_press: root.press_month()
         GridLayout:
             cols: 3
-            size_hint: 0.9,0.6
+            size_hint: 0.9,0.9
             spacing: "10dp"
             pos_hint: {"center_x":.5}
             Button:
                 text: "Enero"
                 on_press: root.on_january()
+                disabled: root.activate_buttons
             Button:
                 text: "Febrero"
                 on_press: root.on_febuary()
+                disabled: root.activate_buttons
             Button:
                 text: "Marzo" 
                 on_press: root.on_march()
+                disabled: root.activate_buttons
             Button:
                 text: "Abril"
                 on_press: root.on_april()
+                disabled: root.activate_buttons
             Button:
                 text: "Mayo"
                 on_press: root.on_may()
+                disabled: root.activate_buttons
             Button:
                 text: "Junio"
                 on_press: root.on_june()
+                disabled: root.activate_buttons
             Button:
                 text: "Julio"
                 on_press: root.on_july()
+                disabled: root.activate_buttons
             Button:
                 text: "Agosto"
                 on_press: root.on_august()
+                disabled: root.activate_buttons
             Button:
                 text: "Septiembre"
                 on_press: root.on_september()
+                disabled: root.activate_buttons
             Button:
                 text: "Octubre"
                 on_press: root.on_october()
+                disabled: root.activate_buttons
             Button:
                 text: "Noviembre"
                 on_press: root.on_november()
+                disabled: root.activate_buttons
             Button:
                 text: "Diciembre"
                 on_press: root.on_december()
+                disabled: root.activate_buttons
+        Button:
+            pos_hint: {"center_x":.5}
+            size_hint: .9,.2
+            text: "Regresar"
+            on_release: app.root.current = '1'
 
 <reporte_de_ingresos>:
     name: '7'

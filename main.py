@@ -19,6 +19,7 @@ from pyzbar.pyzbar import decode
 from datetime import datetime
 import csv
 from plyer import storagepath
+
 #################### GLOBAL VARIABLES ##########################
 Builder.load_file('app.kv')
 general_path = os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
@@ -199,6 +200,13 @@ class agregar_alumno(Screen):
         pdf.image(responsiva_path,20,100,180,160)
         pdf.output(f"{documents_folder}/{name}.pdf","F")
         os.remove(QR_path)
+
+    def on_leave(self):
+        self.ids.name_input.text=""
+        self.ids.address_input.text=""
+        self.ids.age_input.text=""
+        self.ids.phone_input.text=""
+        self.ids.last_name_input.text=""
 class reportes(Screen):
     pass
 class escanear(Screen):
@@ -206,6 +214,7 @@ class escanear(Screen):
     text_label = StringProperty("QR code info will be shown here")
     buttons_desactived = BooleanProperty(True)
     record = BooleanProperty(False)
+    
 
     def __init__(self, **kwargs):
         super(escanear, self).__init__(**kwargs)
@@ -215,7 +224,7 @@ class escanear(Screen):
     def on_enter(self):
         try:
             self.ids.camera.play = True
-            Clock.schedule_interval(self.scan_for_qr, 1.0 / 5.0)
+            Clock.schedule_interval(self.scan_for_qr, 1.0 / 30.0)
         except Exception as e:
             print(f"Error starting camera: {e}")
 
@@ -305,7 +314,7 @@ class buscar_alumno(Screen):
     text_label = StringProperty("Datos")
     search_name = ""
     activate_delete = BooleanProperty(True)
-    activate_attendance = BooleanProperty(True)
+    activate_buttons = BooleanProperty(True)
 
     def search_press(self):
         global id
@@ -322,10 +331,10 @@ class buscar_alumno(Screen):
             if label:
                 num_class = GetNumClases_OrSubstract(id,False)
                 self.text_label = f"""Nombre: {label[0][1]} \nTelefono: {label[0][4]}\nClases restantes: {num_class}"""
-                self.activate_attendance = False 
+                self.activate_buttons = False 
             else:
                 self.text_label = "Registro Inexistente"
-                self.activate_attendance = True
+                self.activate_buttons = True
 
         elif self.search_name:
             conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
@@ -335,10 +344,10 @@ class buscar_alumno(Screen):
             if label:
                 self.text_label = f"""Nombre: {label[0][1]} \nTelefono: {label[0][4]}"""
                 id = label[0][0]
-                self.activate_attendance = False 
+                self.activate_buttons = False 
             else:
                 self.text_label = "Registro Inexistente"
-                self.activate_attendance = True
+                self.activate_buttons = True
         else: 
             self.text_label = "Ingresa el número o nombre del alumno"
             return
@@ -351,6 +360,7 @@ class buscar_alumno(Screen):
             id = self.ids.search_id.text
         mark_attendance(id)
         GetNumClases_OrSubstract(id,True)
+        self.activate_buttons=True
         self.text_label="Asistencia Registrada"
 
     def on_switch_active(self,widget):
@@ -364,21 +374,30 @@ class buscar_alumno(Screen):
         if id:
             c.execute("DELETE FROM registros WHERE id=?",(id,))
             c.execute("DELETE FROM attendance WHERE student_id=?",(id,))
+            c.execute("DELETE FROM payments WHERE student_id=?",(id,))
         elif self.search_name:
             c.execute("SELECT id FROM registros WHERE name =?",(self.search_name))
             id = c.fetchall()[0][0]
             c.execute("DELETE FROM registros WHERE name=?",(id,))
             c.execute("DELETE FROM attendande WHERE id=?",(id,))
+            c.execute("DELETE FROM payments WHERE student_id = ?",(id,))
 
         conn.commit()
         conn.close()
         self.text_label = "Registro Eliminado"
+    
+    def on_leave(self):
+        self.ids.search.text=""
+        self.ids.search_id.text=""
 class reporte_de_asistencias(Screen):
     day = date.today().day
     month = date.today().month
     year = date.today().year
     text_label = StringProperty("Selecciona un periodo")
+    activate_buttons=BooleanProperty(True)
 
+    def press_month(self):
+        self.activate_buttons= False
     def on_january(self):
         get_csv(1,1,self.year,31,1,self.year)
         self.text_label="Reporte generado"
@@ -449,17 +468,18 @@ class reporte_de_ingresos(Screen):
     def on_december(self):
         self.text_label="Reporte generado"
     def get_daily_income(self):
-        date = present_date
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
         c = conn.cursor()
-        query2 = "SELECT %s FROM payments"%date####ERORR HERE
+        query2 = 'SELECT "%s" FROM payments'%present_date
         c.execute(query2)
         data = c.fetchall()
-        print(data)
         total=0
         if data:
             total = sum([num[0] for num in data])
-        self.text_label = f"Ingreso de hoy: {total}"
+            self.text_label = f"Ingreso del día: {str(total)}"
+        else:
+            self.text_label = "No hay registro disponible"
+        
 class Navegar(ScreenManager):
     pass
 class Application(App):
