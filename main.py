@@ -15,7 +15,7 @@ import os
 from datetime import date
 from PIL import Image
 from pyzbar.pyzbar import decode
-import re
+#import re
 from datetime import datetime
 import csv
 from plyer import storagepath
@@ -246,11 +246,11 @@ class escanear(Screen):
                 self.stop_camera()
                 qr_code_data = decoded_objects[0].data.decode('utf-8')
                 self.text_label = qr_code_data
-                pattern_id = r'id:\d+'
-                matches = re.findall(pattern_id, qr_code_data)
-                id = matches[0][3:]
-                self.buttons_desactived = False
-                self.text_label = self.get_info(id)
+                # pattern_id = r'id:\d+'
+                # matches = re.findall(pattern_id, qr_code_data)
+                # id = matches[0][3:]
+                # self.buttons_desactived = False
+                # self.text_label = self.get_info(id)
                 
     def get_info(self,id):
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
