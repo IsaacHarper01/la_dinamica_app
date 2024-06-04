@@ -1,43 +1,58 @@
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
+from kivy.lang.builder import Builder
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.core.window import Window
+from kivy.properties import StringProperty, BooleanProperty
 from kivy.clock import Clock
-# from kivy.uix.label import Label
-# from kivy.uix.button import Button
-# from kivy_garden.zbarcam import ZBarCam
 
-class QRScanner(BoxLayout):
-    def __init__(self, **kwargs):
-        super(QRScanner, self).__init__(**kwargs)
-        self.orientation = 'vertical'
-        # ZBarCam widget to scan QR codes
-        # self.zbarcam = ZBarCam()
-        # self.add_widget(self.zbarcam)
-        
-        # Label to display scanned QR code
-        # self.qr_label = Label(text="Scanned QR code will appear here")
-        # self.add_widget(self.qr_label)
-        
-        # Button to rescan QR code
-        # self.rescan_button = Button(text="Scan Again")
-        # self.rescan_button.bind(on_press=self.rescan)
-        # self.add_widget(self.rescan_button)
-        
-        # Schedule a method to check for QR codes
-        Clock.schedule_interval(self.check_qr_code, 1)
+from PIL import Image
+from pyzbar.pyzbar import decode
 
-    def check_qr_code(self, dt):
-        if self.zbarcam.symbols:
-            qr_code_data = self.zbarcam.symbols[0].data.decode('utf-8')
-            self.qr_label.text = f"QR code detected: {qr_code_data}"
-            self.zbarcam.play = False  # Stop the camera after detecting a QR code
+Builder.load_file('qrapp.kv')
 
-    def rescan(self, instance):
-        self.zbarcam.play = True
-        self.qr_label.text = "Scanned QR code will appear here"
+class scanner(Screen):
 
-class QRScannerApp(App):
+    def on_enter(self):
+        try:
+            self.ids.camera.play= True
+            Clock.schedule_interval(self.scan_qr, 1.0 / 10.0)
+        except Exception as e:
+            print(f"Error starting camera: {e}")
+
+    def stop_camera(self):
+        try:
+            self.ids.camera.play = False
+            Clock.unschedule(self.scan_qr)
+        except Exception as e:
+            print(f"Error stopping camera {e}")
+
+    def scan_qr(self,dt):
+        texture = self.ids.camera.texture
+        if texture:
+            size = texture.size
+            buffer = texture.pixels
+            image = Image.frombytes(mode='RGBA',size=size,data=buffer)
+            decoded_image = decode(image)
+            if decoded_image:
+                self.stop_camera()
+                qr_data = str(decoded_image[0].data.decode('utf-8'))
+                self.ids.qr_label.text = qr_data
+class home(Screen):
+    pass
+class Navegar(ScreenManager):
+    pass
+
+class Application(App):
+    
     def build(self):
-        return QRScanner()
-
+        kv = ScreenManager()
+        kv.add_widget(home(name='1'))
+        kv.add_widget(scanner(name='2'))
+        return kv
+    
 if __name__ == '__main__':
-    QRScannerApp().run()
+    Application().run()     
+        
+
+
+
