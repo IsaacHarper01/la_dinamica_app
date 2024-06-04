@@ -2,7 +2,6 @@
 from kivy.app import App
 from kivy.lang.builder import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.core.window import Window
 from kivy.properties import StringProperty, BooleanProperty
 from kivy.clock import Clock
 
@@ -118,12 +117,17 @@ def get_csv(s_day,s_month,s_year,e_day,e_month,e_year):
     cursor.execute(f'SELECT {columns_str} FROM attendance')
     data_rows = cursor.fetchall()
     
-    with open(f'{documents_folder}/{file_name}', 'w', newline='') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(complete_data)
-        csvwriter.writerows(data_rows)
-    conn.close()
-
+    if len(period_columns)>0:
+        with open(f'{documents_folder}/{file_name}', 'w', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(complete_data)
+            csvwriter.writerows(data_rows)
+            conn.close()
+            return True
+    else: 
+        conn.close()
+        return False
+        
 #################### APP FUNCTIONALITIS ########################
 class main_screen(Screen):
     pass
@@ -131,35 +135,39 @@ class agregar_alumno(Screen):
     texto_registro = StringProperty("")
 
     def on_press_registro(self):
-        self.texto_registro = "Creando Registro..."
         name = self.ids.name_input.text
         address = self.ids.address_input.text
         age = self.ids.age_input.text
         phone = self.ids.phone_input.text
         last_name = self.ids.last_name_input.text
-        #cleaning the fileds
-        self.ids.name_input.text=""
-        self.ids.address_input.text=""
-        self.ids.age_input.text=""
-        self.ids.phone_input.text=""
-        self.ids.last_name_input.text=""
-        #creating the sql conection and inserting data in the db
-        complete_name = name + " " + last_name
-        conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
-        c = conn.cursor()
-        c.execute("INSERT INTO registros (name,age,address,phone) VALUES (?,?,?,?)",(complete_name,age,address,phone))
-        conn.commit()
-        c.execute("SELECT id FROM registros WHERE name=?",(complete_name,))
-        id_number = c.fetchall()[0][0]
-        c.execute("INSERT INTO attendance (student_id,name,age,address) VALUES (?,?,?,?)",(id_number,complete_name,age,address))
-        c.execute("INSERT INTO payments (student_id,clases_number,total) VALUES(?,?,?)",(id_number,0,0))
-        conn.commit() 
-        conn.close()
-        QR_name = self.generate_QR(complete_name,id_number,age,address,phone)
-        self.generate_pdf(QR_name,complete_name,id_number,phone)
-        Make0_Nonevalues('attendance')
-        Make0_Nonevalues('payments')
-        self.texto_registro = "Registro Completado"
+        if name == "" or address == "" or age == "" or phone == "" or last_name == "":
+            self.ids.text_register.text = "Ingresa los datos necesarios"
+            return
+        else: 
+            self.ids.text_register.text = "Creando Registro..."
+            #cleaning the fileds
+            self.ids.name_input.text=""
+            self.ids.address_input.text=""
+            self.ids.age_input.text=""
+            self.ids.phone_input.text=""
+            self.ids.last_name_input.text=""
+            #creating the sql conection and inserting data in the db
+            complete_name = name + " " + last_name
+            conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
+            c = conn.cursor()
+            c.execute("INSERT INTO registros (name,age,address,phone) VALUES (?,?,?,?)",(complete_name,age,address,phone))
+            conn.commit()
+            c.execute("SELECT id FROM registros WHERE name=?",(complete_name,))
+            id_number = c.fetchall()[0][0]
+            c.execute("INSERT INTO attendance (student_id,name,age,address) VALUES (?,?,?,?)",(id_number,complete_name,age,address))
+            c.execute("INSERT INTO payments (student_id,clases_number,total) VALUES(?,?,?)",(id_number,0,0))
+            conn.commit() 
+            conn.close()
+            QR_name = self.generate_QR(complete_name,id_number,age,address,phone)
+            self.generate_pdf(QR_name,complete_name,id_number,phone)
+            Make0_Nonevalues('attendance')
+            Make0_Nonevalues('payments')
+            self.texto_registro = "Registro Completado"
         
     def generate_QR(self,name,id,age,address,phone):
         text = f'nombre:{name},id:{id},Edad:{age},localidad:{address},telefono:{phone}'
@@ -204,10 +212,11 @@ class agregar_alumno(Screen):
         self.ids.age_input.text=""
         self.ids.phone_input.text=""
         self.ids.last_name_input.text=""
+        self.ids.text_register.text = ""
 class reportes(Screen):
     pass
 class escanear(Screen):
-    global id
+    
     buttons_desactived = BooleanProperty(True)
     record = BooleanProperty(False)
     
@@ -218,7 +227,8 @@ class escanear(Screen):
 
     def on_leave(self):
         self.stop_camera()
-        id = None
+        self.buttons_desactived = True
+        self.ids.qr_label.text = "Información del alumno"
 
     def on_enter(self):
         try:
@@ -234,10 +244,17 @@ class escanear(Screen):
             print(f"Error stopping camera {e}")
 
     def scan_qr(self,dt):
+        global id
         self.ids.qrcodecam.play = True
         if len(self.ids.qrcodecam.symbols)>0:
             decoded_data = str(self.ids.qrcodecam.symbols[0].data)
             self.ids.qr_label.text = decoded_data
+            self.stop_camera()
+            pattern_id = r'id:\d+'
+            matches = re.findall(pattern_id, decoded_data)
+            id = matches[0][3:]
+            self.buttons_desactived = False
+            self.ids.qr_label.text = self.get_info(id)
             self.stop_camera()
     
     def get_info(self,id):
@@ -273,7 +290,10 @@ class pagos(Screen):
         num_class = self.ids.class_register.text
         if not id:
             id = self.ids.id.text
-        pay(id,amount,num_class)
+        if id != "" and amount != "" and num_class != "":
+            pay(id,amount,num_class)
+        else:
+            self.ids.general_label.text = "Completa los campos vacíos"
 
     def get_daily_income(self):
         data = date.today().strftime("%d-%m-%Y")
@@ -368,6 +388,7 @@ class buscar_alumno(Screen):
     def on_leave(self):
         self.ids.search.text=""
         self.ids.search_id.text=""
+        self.activate_buttons = True
 class reporte_de_asistencias(Screen):
     day = date.today().day
     month = date.today().month
@@ -457,8 +478,7 @@ class reporte_de_ingresos(Screen):
             total = sum([num[0] for num in data])
             self.text_label = f"Ingreso del día: {str(total)}"
         else:
-            self.text_label = "No hay registro disponible"
-        
+            self.text_label = "No hay registro disponible"        
 class Navegar(ScreenManager):
     pass
 class Application(App):

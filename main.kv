@@ -1,0 +1,20 @@
+
+<QRScanner>:
+    rescan_button: rescan_button
+
+    ZBarCam:
+        id: zbarcam
+        play: True
+        on_symbols: root.check_qr_code(self)
+    Label:
+        id: qr_label
+        text: "Scanned QR code will appear here"
+        size_hint_y: None
+        height: "48dp"
+
+    Button:
+        id: rescan_button
+        text: "Scan Again"
+        size_hint_y: None
+        height: "48dp"
+        on_press: root.rescan()

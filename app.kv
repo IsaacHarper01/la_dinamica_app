@@ -104,6 +104,7 @@
             on_release: app.root.current = '1'
 
         Label:
+            id: text_register
             text: root.texto_registro 
             size_hint: .4,.3
             pos_hint: { "center_x": .5 }
@@ -140,7 +141,7 @@
             id: qr_label
             text: "Información del alumno"
         Button:
-            text: "Scan"
+            text: "Escanear"
             on_press: root.on_enter()
         Button:
             text: "Marcar asistencia"
@@ -184,12 +185,12 @@
             on_press: root.mark_present()
             disabled: root.activate_buttons
         Button:
-            text: "Reporte de asistencias"
-            disabled: True
-        Button:
             text: "Pagos"
             disabled: root.activate_buttons
             on_release: app.root.current = '8'
+        Button:
+            text: "Reporte de asistencias"
+            disabled: True
         Button:
             text: "Eliminar registro"
             on_press: root.delete_register()
@@ -439,6 +440,9 @@
         size_hint: .8, .9
         spacing: "20dp"
         pos_hint: {"center_x":0.5,"center_y":0.5}
+        Label:
+            id: general_label
+            text: "Introduce la cantidad a pagar"
         Label:
             text: "Cantidad a Pagar:"
         TextInput:
