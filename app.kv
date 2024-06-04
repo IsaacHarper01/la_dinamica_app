@@ -126,13 +126,10 @@
             on_release: app.root.current = '1'
         
 <escanear>:
+    #:import ZBarCam kivy_garden.zbarcam.ZBarCam
     name: '4'
-    Camera:
-        orientation: "horizontal"
-        id: camera
-        size_hint: 1,.5
-        pos_hint: {"center_y":.8}
-        resolution: (1024,768)
+    ZBarCam:
+        id:qrcodecam
         play: False
     GridLayout:
         spacing: "15dp"
@@ -141,9 +138,9 @@
         pos_hint: {"center_x":.5}
         Label:
             id: qr_label
-            text: root.text_label
+            text: "Información del alumno"
         Button:
-            text: "Start"
+            text: "Scan"
             on_press: root.on_enter()
         Button:
             text: "Marcar asistencia"

@@ -42,7 +42,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements=python3,kivy==2.3.0,docutils,Kivy-Garden,typing_extensions,pygments,pillow,sqlite3,png,qrcode,pypng,fpdf,plyer,pyzxing,joblib,numpy
+requirements=python3,kivy==2.3.0,docutils,Kivy-Garden,kivy_garden.zbarcam,typing_extensions,pygments,pillow,sqlite3,png,qrcode,pypng,fpdf,plyer,pyzxing,joblib,numpy
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -56,7 +56,7 @@ icon.filename = %(source.dir)s/data/f=ma11.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
-orientation = all
+orientation = portrait
 
 # (list) List of services to declare
 # This is currently only relevant to Android services.
