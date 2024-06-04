@@ -7,7 +7,7 @@ Builder.load_file('qrapp.kv')
 
 class scanner(Screen):
 
-    def start(self):
+    def on_enter(self):
         try:
             Clock.schedule_interval(self.scan_qr, 1.0 / 5.0)
         except Exception as e:
@@ -15,7 +15,7 @@ class scanner(Screen):
 
     def stop_camera(self):
         try:
-            self.ids.camera.play = False
+            self.ids.qrcodecam.play = False
             Clock.unschedule(self.scan_qr)
         except Exception as e:
             print(f"Error stopping camera {e}")
@@ -25,8 +25,11 @@ class scanner(Screen):
         if len(self.ids.qrcodecam.symbols)>0:
             decoded_data = str(self.ids.qrcodecam.symbols[0].data)
             self.ids.qr_label.text = decoded_data
-            self.ids.qrcodecam.play=False
-            Clock.unschedule(self.scan_qr)
+            self.stop_camera()
+    
+    def scan_again(self):
+        self.on_enter()
+
         
 class home(Screen):
     pass
