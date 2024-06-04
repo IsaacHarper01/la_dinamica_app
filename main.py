@@ -12,9 +12,8 @@ import qrcode
 import sqlite3
 from fpdf import FPDF
 import os
-from datetime import date
-#import re
-from datetime import datetime
+from datetime import date, datetime
+import re
 import csv
 from plyer import storagepath
 
