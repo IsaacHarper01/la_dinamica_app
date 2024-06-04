@@ -21,17 +21,19 @@
 
         
 <scanner>:
+    #:import ZBarCam kivy_garden.zbarcam.ZBarCam
     name: '2'
     GridLayout:
         cols:1
         pos_hint: {"center_x":0.5,"center_y":0.5}
         spacing: "10dp"
-        Camera:
-            id: camera
-            orientation: "horizontal"
-            size_hint: 1,.5
-            pos_hint: {"center_y":.8}
-            play: True
+        ZBarCam:
+            id:qrcodecam
+            play: False
+        Button:
+            id:start
+            text: "Start"
+            on_press: root.start()
         Label:
             id: qr_label
-            text: "QR text will apear here"
+            text: "QR info will be shown here"
