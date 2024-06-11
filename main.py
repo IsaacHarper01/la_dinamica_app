@@ -20,7 +20,8 @@ from plyer import storagepath
 Builder.load_file('app.kv')
 general_path = os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
 documents_folder = storagepath.get_documents_dir()
-present_date = date.today().strftime("%d-%m-%Y")
+#present_date = date.today().strftime("%d-%m-%Y")
+present_date= "08-06-2024"
 id = None
 ##################### GLOABAL FUNCTIONS ########################
 
@@ -225,9 +226,11 @@ class escanear(Screen):
         self.capture = None
         self.scanning = True
 
-    def on_leave(self):
+    def on_leave(self):                             
+        
         self.stop_camera()
         self.buttons_desactived = True
+        self.ids.qrcodecam.ids.xcamera._camera._device.release()
         self.ids.qr_label.text = "Información del alumno"
 
     def on_enter(self):
@@ -290,8 +293,9 @@ class pagos(Screen):
         num_class = self.ids.class_register.text
         if not id:
             id = self.ids.id.text
-        if id != "" and amount != "" and num_class != "":
+        if amount != "" and num_class != "":
             pay(id,amount,num_class)
+            self.ids.general_label.text = "Pago registrado"
         else:
             self.ids.general_label.text = "Completa los campos vacíos"
 

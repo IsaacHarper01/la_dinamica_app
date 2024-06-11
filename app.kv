@@ -435,35 +435,46 @@
 
 <pagos>:
     name:'8'
-    GridLayout:
-        cols: 1
-        size_hint: .8, .9
-        spacing: "20dp"
-        pos_hint: {"center_x":0.5,"center_y":0.5}
-        Label:
-            id: general_label
-            text: "Introduce la cantidad a pagar"
-        Label:
-            text: "Cantidad a Pagar:"
-        TextInput:
-            id: pay_register
-            multiline: False
-        Label:
-            text: "Número de clases"
-        TextInput:
-            id: class_register
-            multiline:False
-        Label:
-            text: "Número de alumno"
-        TextInput:
-            id: id
-            multiline: False
-        Button:
-            text: "Pagar"
-            on_press: root.pay_call()
-        Button:
-            text: "Regresar"
-            on_release: app.root.current = '1'
+    BoxLayout:
+        orientation: 'vertical'
+        ScrollView:
+            pos_hint:{"center_x":.5,"center_y":0.8}
+            size_hint: (.7, 1)
+            GridLayout:
+                cols: 1
+                size_hint_y: None
+                height: 1000
+                spacing: "20dp"
+                padding: "20dp"
+                Label:
+                    id: general_label
+                    text: "Introduce la cantidad a pagar"
+                Label:
+                    text: "Cantidad a Pagar:"
+                TextInput:
+                    size_hint: 1,.3
+                    id: pay_register
+                    multiline: False
+                Label:
+                    text: "Número de clases"
+                TextInput:
+                    size_hint: 1,.3
+                    id: class_register
+                    multiline:False
+                Label:
+                    text: "Número de alumno"
+                TextInput:
+                    size_hint: 1,.3
+                    id: id
+                    multiline: False
+                Button:
+                    size_hint: 1,.4
+                    text: "Pagar"
+                    on_press: root.pay_call()
+                Button:
+                    size_hint: 1,.4
+                    text: "Regresar"
+                    on_release: app.root.current = '1'
 
 
         
