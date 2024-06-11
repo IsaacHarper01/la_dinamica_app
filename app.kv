@@ -127,11 +127,9 @@
             on_release: app.root.current = '1'
         
 <escanear>:
-    #:import ZBarCam kivy_garden.zbarcam.ZBarCam
     name: '4'
-    ZBarCam:
+    BoxLayout:
         id:qrcodecam
-        play: False
     GridLayout:
         spacing: "15dp"
         cols:1

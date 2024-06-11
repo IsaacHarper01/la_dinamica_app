@@ -3,11 +3,12 @@ from kivy.app import App
 from kivy.lang.builder import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, BooleanProperty
+from kivy_garden.zbarcam import ZBarCam
 from kivy.clock import Clock
 
 ##################### ACTION LIBRARYS ##########################
 import qrcode
-#import matplotlib.pyplot as plt
+import sys
 import sqlite3
 from fpdf import FPDF
 import os
@@ -228,37 +229,39 @@ class escanear(Screen):
 
     def on_leave(self):                             
         
-        self.stop_camera()
-        self.buttons_desactived = True
-        self.ids.qrcodecam.ids.xcamera._camera._device.release()
-        self.ids.qr_label.text = "Información del alumno"
+        self.cam.stop()
+        self.ids.qrcodecam.remove_widget(self.cam)
+        self.cam.ids.xcamera._camera._device.release()
+        
+        mod_path = os.path.dirname(sys.modules['kivy_garden.zbarcam'].__file__)
+        zbar_kv_path = os.path.join(mod_path, 'zbarcam.kv')           
+        Builder.unload_file(zbar_kv_path)
+
+        mod_path = os.path.dirname(sys.modules['kivy_garden.xcamera'].__file__)
+        xcam_kv_path = os.path.join(mod_path, 'xcamera.kv')
+        Builder.unload_file(xcam_kv_path)
 
     def on_enter(self):
-        try:
-            Clock.schedule_interval(self.scan_qr, 1.0 / 5.0)
-        except Exception as e:
-            print(f"Error starting camera: {e}")
+        self.cam = ZBarCam()
+        self.ids.qrcodecam.add_widget(self.cam)
+        Clock.schedule_interval(self.scan_qr, 1)
+        self.cam.start()
 
     def stop_camera(self):
-        try:
-            self.ids.qrcodecam.play = False
-            Clock.unschedule(self.scan_qr)
-        except Exception as e:
-            print(f"Error stopping camera {e}")
+        self.cam.play = False
+        Clock.unschedule(self.scan_qr) 
 
     def scan_qr(self,dt):
         global id
-        self.ids.qrcodecam.play = True
-        if len(self.ids.qrcodecam.symbols)>0:
-            decoded_data = str(self.ids.qrcodecam.symbols[0].data)
-            self.ids.qr_label.text = decoded_data
+        self.cam.play = True
+        if len(self.cam.symbols)>0:
+            decoded_data = str(self.cam.symbols[0].data)
             self.stop_camera()
             pattern_id = r'id:\d+'
             matches = re.findall(pattern_id, decoded_data)
             id = matches[0][3:]
             self.buttons_desactived = False
             self.ids.qr_label.text = self.get_info(id)
-            self.stop_camera()
     
     def get_info(self,id):
         conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
