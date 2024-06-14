@@ -3,6 +3,8 @@ from kivy.lang.builder import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 from kivy_garden.zbarcam import ZBarCam
+from kivy_garden.xcamera import XCamera
+import sqlite3
 import os 
 import sys 
 
@@ -20,11 +22,11 @@ class scanner(Screen):
     def on_leave(self):
         self.cam.stop()
         self.ids.qrcodecam.remove_widget(self.cam)
-        self.cam.ids.xcamera._camera._device.release()
+        self.cam.ids.xcamera._camera.stopped = True
         
         mod_path = os.path.dirname(sys.modules['kivy_garden.zbarcam'].__file__)
         zbar_kv_path = os.path.join(mod_path, 'zbarcam.kv')           
-        Builder.unload_file(zbar_kv_path)
+        Builder.unload_file(zbar_kv_path) 
 
         mod_path = os.path.dirname(sys.modules['kivy_garden.xcamera'].__file__)
         xcam_kv_path = os.path.join(mod_path, 'xcamera.kv')
@@ -59,10 +61,16 @@ class Application(App):
         kv.add_widget(home(name='1'))
         kv.add_widget(scanner(name='2'))
         return kv
-    
+
 if __name__ == '__main__':
-    Application().run()     
-        
+    Application().run()  
+
+# cam = ZBarCam()
+# print(dir(cam.ids.xcamera._camera))
+
+# source_code = inspect.getsource(device.release)
+# print(source_code)
+
 # import sqlite3
 # from datetime import datetime
 # import os 

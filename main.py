@@ -22,7 +22,7 @@ Builder.load_file('app.kv')
 general_path = os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
 documents_folder = storagepath.get_documents_dir()
 #present_date = date.today().strftime("%d-%m-%Y")
-present_date= "08-06-2024"
+present_date= "11-06-2024"
 id = None
 ##################### GLOABAL FUNCTIONS ########################
 
@@ -227,12 +227,11 @@ class escanear(Screen):
         self.capture = None
         self.scanning = True
 
-    def on_leave(self):                             
-        
-        self.cam.stop()
+    def on_leave(self):
+
+        self.cam.ids.xcamera._camera.stop()
         self.ids.qrcodecam.remove_widget(self.cam)
-        self.cam.ids.xcamera._camera._device.release()
-        
+         
         mod_path = os.path.dirname(sys.modules['kivy_garden.zbarcam'].__file__)
         zbar_kv_path = os.path.join(mod_path, 'zbarcam.kv')           
         Builder.unload_file(zbar_kv_path)
@@ -245,11 +244,15 @@ class escanear(Screen):
         self.cam = ZBarCam()
         self.ids.qrcodecam.add_widget(self.cam)
         Clock.schedule_interval(self.scan_qr, 1)
-        self.cam.start()
+        self.cam.ids.xcamera._camera.start()
 
     def stop_camera(self):
         self.cam.play = False
-        Clock.unschedule(self.scan_qr) 
+        Clock.unschedule(self.scan_qr)
+
+    def scan_again(self):
+        self.cam.play = True
+        Clock.schedule_interval(self.scan_qr, 1)
 
     def scan_qr(self,dt):
         global id
@@ -264,16 +267,19 @@ class escanear(Screen):
             self.ids.qr_label.text = self.get_info(id)
     
     def get_info(self,id):
-        conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
-        c= conn.cursor()
-        query = "SELECT name FROM registros WHERE id=?"
-        c.execute(query,(id,))
-        name=c.fetchall()[0][0]
-        query = "SELECT clases_number FROM payments WHERE student_id=?"
-        c.execute(query,(id,))
-        num_class = c.fetchall()[0][0]
-        data = f"Número de alumno: {id}\nNombre: {name}\nClases restantes: {num_class}"
-        return data
+        try:
+            conn = sqlite3.connect(f"{general_path}/data/alumnos.db")
+            c= conn.cursor()
+            query = "SELECT name FROM registros WHERE id=?"
+            c.execute(query,(id,))
+            name=c.fetchall()[0][0]
+            query = "SELECT clases_number FROM payments WHERE student_id=?"
+            c.execute(query,(id,))
+            num_class = c.fetchall()[0][0]
+            data = f"Número de alumno: {id}\nNombre: {name}\nClases restantes: {num_class}"
+            return data
+        except:
+            return "No se encontró ningun registro"
     
     def mark_present(self):
         global id
