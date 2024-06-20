@@ -49,10 +49,10 @@ requirements=python3,kivy==2.3.0,docutils,Kivy-Garden,kivy_garden.zbarcam,typing
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/data/f=ma11.png
+presplash.filename = %(source.dir)s/data/f=ma18.png
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/data/f=ma11.png
+icon.filename = %(source.dir)s/data/f=ma12.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse

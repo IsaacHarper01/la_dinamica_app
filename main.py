@@ -21,8 +21,8 @@ from plyer import storagepath
 Builder.load_file('app.kv')
 general_path = os.path.dirname(os.path.abspath(__file__).replace('\\','/'))
 documents_folder = storagepath.get_documents_dir()
-#present_date = date.today().strftime("%d-%m-%Y")
-present_date= "11-06-2024"
+present_date = date.today().strftime("%d-%m-%Y")
+
 id = None
 ##################### GLOABAL FUNCTIONS ########################
 
@@ -142,10 +142,7 @@ class agregar_alumno(Screen):
         age = self.ids.age_input.text
         phone = self.ids.phone_input.text
         last_name = self.ids.last_name_input.text
-        if name == "" or address == "" or age == "" or phone == "" or last_name == "":
-            self.ids.text_register.text = "Ingresa los datos necesarios"
-            return
-        else: 
+        if name != "" and address != "" and age != "" and phone != "" and last_name == "":
             self.ids.text_register.text = "Creando Registro..."
             #cleaning the fileds
             self.ids.name_input.text=""
@@ -170,7 +167,9 @@ class agregar_alumno(Screen):
             Make0_Nonevalues('attendance')
             Make0_Nonevalues('payments')
             self.texto_registro = "Registro Completado"
-        
+        else:
+            self.ids.text_register.text = "Ingresa los datos necesarios"
+
     def generate_QR(self,name,id,age,address,phone):
         text = f'nombre:{name},id:{id},Edad:{age},localidad:{address},telefono:{phone}'
         qr = qrcode.QRCode(
@@ -231,6 +230,7 @@ class escanear(Screen):
 
         self.cam.ids.xcamera._camera.stop()
         self.ids.qrcodecam.remove_widget(self.cam)
+        #self.ids.qrcodecam.ids.xcamera._camera._device.release()
          
         mod_path = os.path.dirname(sys.modules['kivy_garden.zbarcam'].__file__)
         zbar_kv_path = os.path.join(mod_path, 'zbarcam.kv')           
@@ -239,12 +239,11 @@ class escanear(Screen):
         mod_path = os.path.dirname(sys.modules['kivy_garden.xcamera'].__file__)
         xcam_kv_path = os.path.join(mod_path, 'xcamera.kv')
         Builder.unload_file(xcam_kv_path)
-
+        
     def on_enter(self):
         self.cam = ZBarCam()
         self.ids.qrcodecam.add_widget(self.cam)
         Clock.schedule_interval(self.scan_qr, 1)
-        self.cam.ids.xcamera._camera.start()
 
     def stop_camera(self):
         self.cam.play = False
@@ -284,7 +283,8 @@ class escanear(Screen):
     def mark_present(self):
         global id
         mark_attendance(id)
-        GetNumClases_OrSubstract(id,True)      
+        GetNumClases_OrSubstract(id,True)
+        self.ids.qr_label.text = "Asistencia Registrada"      
 class pagos(Screen):
 
     def on_enter(self):
@@ -295,6 +295,11 @@ class pagos(Screen):
         else:
             self.ids.id.readonly= False
         return
+
+    def on_leave(self):
+        self.ids.pay_register.text = ""
+        self.ids.class_register.text = ""
+        self.ids.id.text = ""
 
     def pay_call(self):
         global id
